@@ -1,1 +1,1 @@
-py -m  pipreqs.pipreqs .
+py -m  pipreqs.pipreqs . --force
