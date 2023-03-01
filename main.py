@@ -1,9 +1,9 @@
 from enum import Enum
-from typing import Union
+from typing import List, Union
 
 from pydantic import BaseModel
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 
 app = FastAPI()
 # 
@@ -42,7 +42,27 @@ async def create_item(item_id: int, item: Item, q: Union[str, None] = None):
     return result
 
 # GET
+
+@app.get("/items_list/")
+async def read_items(q: Union[List[str], None] = Query(default=None)):
+    query_items = {"q": q}
+    return query_items
+
 @app.get("/items/")
+async def read_items(q: Union[str, None] = Query(default=..., min_length=3)):
+    results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+    if q:
+        results.update({"q": q})
+    return results
+
+@app.get("/items_a/")
+async def read_items(q: Union[str, None] = Query(default="fixedquery", min_length=3, max_length=50, regex="^fixedquery$")):
+    results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+    if q:
+        results.update({"q": q})
+    return results
+
+@app.get("/items_fake/")
 async def read_item(skip: int = 0, limit: int = 10):
     return fake_items_db[skip : skip + limit]
 
