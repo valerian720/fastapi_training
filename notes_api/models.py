@@ -3,6 +3,17 @@ from sqlalchemy.orm import relationship
 
 from .database import Base
 
+"""
+Список таблиц для приложения для создания заметок
+- User
+- Title
+- Note
+
+user owns many titles
+title owns many titles
+title owns many notes
+
+"""
 
 class User(Base):
     __tablename__ = "users"
