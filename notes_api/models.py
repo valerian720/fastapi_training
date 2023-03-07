@@ -22,16 +22,32 @@ class User(Base):
     email = Column(String(50), unique=True, index=True)
     hashed_password = Column(String(100))
     is_active = Column(Boolean, default=True)
+    # meta
+    titles = relationship("Title", back_populates="user_owner") # child link
 
-    items = relationship("Item", back_populates="owner")
-
-
-class Item(Base):
-    __tablename__ = "items"
+class Title(Base):
+    __tablename__ = "titles"
 
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String(100), index=True)
-    description = Column(String(300), index=True)
+    name = Column(String(50), unique=True, index=True)
+    is_important = Column(Boolean, default=True)
+    parent_id = Column(Integer, ForeignKey('titles.id'))
     owner_id = Column(Integer, ForeignKey("users.id"))
+    # meta
+    children_title = relationship('Title', remote_side='Title.id') # self link
+    user_owner = relationship("User", back_populates="titles") # parent link
+    notes = relationship("Note", back_populates="title_owner") # child link
 
-    owner = relationship("User", back_populates="items")
+
+class Note(Base):
+    __tablename__ = "notes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    text = Column(String(500))
+    owner_id = Column(Integer, ForeignKey("titles.id"))
+    # meta
+    title_owner = relationship("Title", back_populates="notes") # parent link
+
+
+
+
