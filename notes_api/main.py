@@ -121,15 +121,3 @@ def read_user_notes(user_id: int, title_id: int, skip: int = 0, limit: int = 100
         notes = crud.get_user_notes(db=db, user_id=user_id, title_id=title_id, skip=skip, limit=limit)
         return notes
 # 
-
-# @app.post("/users/{user_id}/items/", response_model=schemas.Item)
-# def create_item_for_user(
-#     user_id: int, item: schemas.ItemCreate, db: Session = Depends(get_db)
-# ):
-#     return crud.create_user_item(db=db, item=item, user_id=user_id)
-
-
-# @app.get("/items/", response_model=List[schemas.Item])
-# def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-#     items = crud.get_items(db, skip=skip, limit=limit)
-#     return items
