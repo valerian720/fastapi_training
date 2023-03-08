@@ -28,12 +28,12 @@ class Note(NoteBase):
 # ----------------------------- Title
 class TitleBase(BaseModel):
     name: str
-    is_important: bool
+    is_important: Union[bool, None] = None
+    parent_id: Union[int, None] = None
 class TitleCreate(TitleBase):
     pass
 class Title(TitleBase):
     id: int
-    parent_id: int
     owner_id: int
 
     notes: List[Note] = []
