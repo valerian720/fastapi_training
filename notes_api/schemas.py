@@ -19,12 +19,18 @@ class TitleBase(BaseModel):
     parent_id: Union[int, None] = None
 class TitleCreate(TitleBase):
     pass
+class TitleChild(TitleBase):
+    id: int
+    owner_id: int
+    class Config:
+        orm_mode = True
 class Title(TitleBase):
     id: int
     owner_id: int
 
     notes: List[Note] = []
-    # parent: TitleBase # ???
+    parent_title: Union[TitleChild, None] = None
+    # children_title: List[Union[TitleBase, None]] = None
     class Config:
         orm_mode = True
 

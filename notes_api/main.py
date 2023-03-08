@@ -76,13 +76,6 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 #     users = crud.get_users(db, skip=skip, limit=limit)
 #     return users
 
-def check_user(user_id: int, db: Session, current_user: schemas.User):
-    db_user = crud.get_user(db, user_id=user_id)
-    if db_user is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    if db_user.id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"You are not permitted, your id is <{current_user.id}>")
-    return db_user
 
 @app.get("/users/{user_id}", response_model=schemas.User)
 def read_user(user_id: int, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user_from_token)):
@@ -105,19 +98,78 @@ def read_user_titles(user_id: int, skip: int = 0, limit: int = 100, db: Session 
         titles = crud.get_user_titles(db=db, user_id=user_id, skip=skip, limit=limit)
         return titles
 
+@app.put("/users/{user_id}/titles/", response_model=schemas.Title)
+def update_title(user_id: int, title_id: int, title: schemas.TitleCreate, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user_from_token)):
+    try:
+        check_user(user_id, db, current_user)
+        check_title(title_id, db)
+    finally:
+        return crud.update_title(db=db, title_id=title_id, title=title)
+    
+@app.delete("/users/{user_id}/titles/")
+def delete_title(user_id: int, title_id: int, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user_from_token)):
+    try:
+        check_user(user_id, db, current_user)
+        check_title(title_id, db)
+    finally:
+        return crud.delete_title(db=db, title_id=title_id)
+
+
 # notes
 @app.post("/users/{user_id}/{title_id}/", response_model=schemas.Note)
 def create_note_for_user(user_id: int, title_id:int, note: schemas.NoteCreate, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user_from_token)):
     try:
         check_user(user_id, db, current_user)
+        check_title(title_id, db)
     finally:
-        return crud.create_user_notes(db=db, title_id=title_id, note=note, user_id=user_id)
+        return crud.create_title_notes(db=db, title_id=title_id, note=note)
 
 @app.get("/users/{user_id}/{title_id}/", response_model=List[schemas.Note])
 def read_user_notes(user_id: int, title_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user_from_token)):
     try:
         check_user(user_id, db, current_user)
+        check_title(title_id, db)
     finally:
-        notes = crud.get_user_notes(db=db, user_id=user_id, title_id=title_id, skip=skip, limit=limit)
+        notes = crud.get_title_notes(db=db, title_id=title_id, skip=skip, limit=limit)
         return notes
-# 
+
+@app.put("/users/{user_id}/{title_id}/", response_model=schemas.Note)
+def update_note(user_id: int, title_id: int, note_id:int, note: schemas.NoteCreate, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user_from_token)):
+    try:
+        check_user(user_id, db, current_user)
+        check_title(title_id, db)
+        check_note(note_id, db)
+    finally:
+        return crud.update_note(db=db, note_id=note_id, note=note)
+    
+@app.delete("/users/{user_id}/{title_id}/")
+def delete_note(user_id: int, title_id: int, note_id: int, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user_from_token)):
+    try:
+        check_user(user_id, db, current_user)
+        check_title(title_id, db)
+        check_note(note_id, db)
+    finally:
+        return crud.delete_note(db=db, note_id=note_id)
+
+
+# //////////////////////
+
+def check_user(user_id: int, db: Session, current_user: schemas.User):
+    db_user = crud.get_user(db, user_id=user_id)
+    if db_user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    if db_user.id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"You are not permitted, your id is <{current_user.id}>")
+    return db_user
+
+def check_title(title_id: int, db: Session):
+    db_title = crud.get_title(db, title_id=title_id)
+    if db_title is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Title not found")
+    return db_title
+
+def check_note(note_id: int, db: Session):
+    db_note = crud.get_note(db, note_id=note_id)
+    if db_note is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Note not found")
+    return db_note

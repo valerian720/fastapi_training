@@ -34,7 +34,7 @@ class Title(Base):
     parent_id = Column(Integer, ForeignKey('titles.id'))
     owner_id = Column(Integer, ForeignKey("users.id"))
     # meta
-    children_title = relationship('Title', remote_side='Title.id') # self link
+    parent_title = relationship('Title', remote_side='Title.id') # self link
     user_owner = relationship("User", back_populates="titles") # parent link
     notes = relationship("Note", back_populates="title_owner") # child link
 
