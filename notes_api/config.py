@@ -4,7 +4,6 @@ class KeyHolder(object):
     def __new__(cls):
         if not hasattr(cls, 'instance'):
             cls.instance = super(KeyHolder, cls).__new__(cls)
-            print("==============================", os.listdir(os.curdir))
             with open('key.secret', 'r') as f:
                 cls.instance.key = f.read()
         return cls.instance

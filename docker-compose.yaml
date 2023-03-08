@@ -1,0 +1,36 @@
+services:
+  mysql:
+    container_name: mysql
+    platform: linux/x86_64
+    build: ./mysql/
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql/db:/docker-entrypoint-initdb.d
+    environment:
+      - MYSQL_ROOT_PASSWORD=archmage
+      - MYSQL_DATABASE=fastapi_app
+    tty: true
+  app:
+    depends_on:
+      - mysql
+    build: .
+    container_name: notes-fastapi-mysql-api
+    command: [
+      "uvicorn",
+      "notes_api.main:app",
+      "--host", "0.0.0.0",
+      "--port", "5000",
+      "--reload",
+      "--reload-include", "*"
+    ]
+    ports:
+      - 80:5000
+    volumes:
+      - .:/app
+    environment:
+      - APP_SECRET_STRING=archmage
+      - DATABASE_USERNAME=root
+      - DATABASE_PASSWORD=archmage
+      - DATABASE=fastapi_app
+      - DATABASE_HOST=mysql
